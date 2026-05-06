@@ -200,6 +200,24 @@ export const RIVERS = [
     featuredHatches: ['Caddis', 'PMD', 'October Caddis'],
     driveNotes: 'Hwy 101 north to Cloverdale/Healdsburg',
   },
+  {
+    id: 'putah-creek',
+    name: 'Putah Creek',
+    location: 'Winters, CA',
+    usgsStationId: '11454000',
+    lat: 38.5138,
+    lon: -121.9563,
+    driveTime: '1h 15m',
+    type: 'Tailwater',
+    species: ['Rainbow Trout'],
+    idealFlow: { min: 150, max: 600 },
+    fairFlow:  { min: 75, max: 1000 },
+    description: 'Trophy tailwater below Monticello Dam (Lake Berryessa). Home to wild rainbows pushing double digits. One of the best kept secrets in NorCal — walk-wade fishing through oak woodland.',
+    regulations: 'Wild Trout water — artificial lures & flies only, C&R for trout',
+    bestSeasons: ['Spring', 'Fall', 'Winter'],
+    featuredHatches: ['Midge', 'Baetis', 'PMD', 'Trico'],
+    driveNotes: 'I-80 east to Vacaville, north on Hwy 505 to Winters',
+  },
 ];
 
 export const ORINDA = { lat: 37.8771, lon: -122.1797 };
