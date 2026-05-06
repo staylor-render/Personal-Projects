@@ -1,5 +1,6 @@
-// Bucket list fly fishing destinations — no real-time flow data,
-// condition is season-based + live weather from Open-Meteo
+// Bucket list fly fishing destinations
+// US destinations (Madison, Snake) pull live USGS flow + temp data
+// International destinations use season + Open-Meteo weather only
 
 // Months are 1-indexed. hemisphere: 'north' | 'south'
 export const BUCKET_LIST = [
@@ -21,6 +22,9 @@ export const BUCKET_LIST = [
     featuredHatches: ['Salmonfly', 'PMD', 'Hopper', 'Caddis', 'Baetis'],
     travelTip: 'Book guides 6–12 months out for July. Ennis is the hub town. Bring 4–6wt.',
     bestFor: 'Dry fly, nymphing',
+    usgsStationId: '06038500',   // Madison River near Ennis, MT
+    idealFlow: { min: 500, max: 2500 },
+    fairFlow:  { min: 250, max: 4500 },
   },
   {
     id: 'snake-river',
@@ -40,6 +44,9 @@ export const BUCKET_LIST = [
     featuredHatches: ['PMx', 'Caddis', 'Hopper', 'Pale Morning Dun'],
     travelTip: 'Pair with a Grand Teton / Yellowstone trip. South Fork (Idaho side) has bigger browns.',
     bestFor: 'Float fishing, dry fly',
+    usgsStationId: '13010065',   // Snake River near Moran, WY (above Jackson Lake)
+    idealFlow: { min: 2000, max: 8000 },
+    fairFlow:  { min: 800, max: 14000 },
   },
   {
     id: 'new-zealand',

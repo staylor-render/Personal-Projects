@@ -1,7 +1,19 @@
 import { useState } from 'react';
-import { Globe, ChevronDown, ChevronUp, Plane } from 'lucide-react';
+import { Globe, ChevronDown, ChevronUp, Plane, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { getSeasonCondition, SEASON_CONFIG } from '../data/bucketList.js';
 import { wmoIcon } from '../hooks/useOpenMeteo.js';
+import {
+  formatFlow, formatTemp, formatDateTime,
+  celsiusToFahrenheit, getFlowCondition, getTempCondition, CONDITION_CONFIG,
+} from '../utils/conditions.js';
+import ConditionBadge from './ConditionBadge.jsx';
+import Sparkline from './Sparkline.jsx';
+
+function TrendIcon({ trend }) {
+  if (trend === 'rising')  return <TrendingUp  size={13} className="text-red-400" />;
+  if (trend === 'falling') return <TrendingDown size={13} className="text-blue-400" />;
+  return <Minus size={13} className="text-slate-500" />;
+}
 
 function SeasonBadge({ destination }) {
   const season = getSeasonCondition(destination);
@@ -34,10 +46,21 @@ function WeatherStrip({ days }) {
   );
 }
 
-export default function BucketListCard({ destination, weatherDays }) {
+export default function BucketListCard({ destination, weatherDays, usgsData }) {
   const [expanded, setExpanded] = useState(false);
   const season = getSeasonCondition(destination);
   const cfg = SEASON_CONFIG[season];
+
+  // Live USGS data — only present for US destinations
+  const stationData = destination.usgsStationId ? (usgsData?.[destination.usgsStationId] ?? {}) : {};
+  const flowEntry = stationData['00060'];
+  const tempEntry = stationData['00010'];
+  const flowCfs = flowEntry?.value ?? null;
+  const tempC   = tempEntry?.value ?? null;
+  const tempF   = tempC != null ? celsiusToFahrenheit(tempC) : null;
+  const flowCond = destination.idealFlow ? getFlowCondition(flowCfs, destination) : 'unknown';
+  const tempCond = getTempCondition(tempF);
+  const hasLiveData = !!destination.usgsStationId;
 
   return (
     <article className={`rounded-2xl border bg-slate-900 overflow-hidden transition-all duration-200 ${cfg.border} hover:shadow-lg hover:shadow-black/30`}>
@@ -67,6 +90,59 @@ export default function BucketListCard({ destination, weatherDays }) {
             </span>
           ))}
         </div>
+
+        {/* Live USGS flow + temp — US destinations only */}
+        {hasLiveData && (
+          <div className="space-y-2 bg-slate-800/40 rounded-xl p-3">
+            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Live Conditions (USGS)</p>
+
+            {/* Flow */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs text-slate-400">Flow</span>
+                <div className="flex items-center gap-2">
+                  {flowEntry?.trend && <TrendIcon trend={flowEntry.trend} />}
+                  <span className={`text-sm font-semibold ${(CONDITION_CONFIG[flowCond] ?? CONDITION_CONFIG.unknown).color}`}>
+                    {formatFlow(flowCfs)}
+                  </span>
+                  <ConditionBadge condition={flowCond} size="sm" />
+                </div>
+              </div>
+              {flowEntry?.sparkline && (
+                <Sparkline
+                  data={flowEntry.sparkline}
+                  color={flowCond === 'ideal' ? '#34d399' : flowCond === 'fair' ? '#fbbf24' : '#f87171'}
+                  height={28}
+                />
+              )}
+            </div>
+
+            <div className="border-t border-slate-700/50" />
+
+            {/* Water temp */}
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-slate-400">Water Temp</span>
+              <div className="flex items-center gap-2">
+                <span className={`text-sm font-semibold ${(CONDITION_CONFIG[tempCond] ?? CONDITION_CONFIG.unknown).color}`}>
+                  {formatTemp(tempC)}
+                </span>
+                <ConditionBadge condition={tempCond} size="sm" />
+              </div>
+            </div>
+
+            {flowEntry?.dateTime && (
+              <p className="text-[10px] text-slate-600 text-right">
+                Last reading {formatDateTime(flowEntry.dateTime)}
+              </p>
+            )}
+
+            <div className="text-[11px] text-slate-500">
+              Ideal range: <span className="text-slate-400 font-medium">
+                {destination.idealFlow.min.toLocaleString()}–{destination.idealFlow.max.toLocaleString()} cfs
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Best for */}
         <p className="text-xs text-slate-400 italic">{destination.bestFor}</p>

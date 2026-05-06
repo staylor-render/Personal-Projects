@@ -11,6 +11,7 @@ import {
   celsiusToFahrenheit,
   formatFlow,
   formatTemp,
+  formatDateTime,
 } from '../utils/conditions.js';
 
 const CONDITION_COLORS = {
@@ -75,11 +76,17 @@ function RiverMarker({ river, usgsData, weatherPeriods }) {
   );
 }
 
-function BucketListMarker({ destination, weatherDays }) {
+function BucketListMarker({ destination, weatherDays, usgsData }) {
   const season = getSeasonCondition(destination);
-  const color  = SEASON_COLORS[season];
   const cfg    = SEASON_CONFIG[season];
   const today  = weatherDays?.[0];
+
+  // For US destinations with USGS data, blend season + live flow into marker color
+  const stationData = destination.usgsStationId ? (usgsData?.[destination.usgsStationId] ?? {}) : {};
+  const flowCfs  = stationData['00060']?.value ?? null;
+  const flowCond = destination.idealFlow ? getFlowCondition(flowCfs, destination) : null;
+  const liveColor = flowCond ? CONDITION_COLORS[flowCond] : null;
+  const color = liveColor ?? SEASON_COLORS[season];
 
   const icon = divIcon({
     html: `<div style="
@@ -160,6 +167,7 @@ export default function MapView({ usgsData, weatherData, openMeteoData, view }) 
             key={dest.id}
             destination={dest}
             weatherDays={openMeteoData[dest.id]}
+            usgsData={usgsData}
           />
         ))}
       </MapContainer>

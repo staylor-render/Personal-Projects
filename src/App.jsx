@@ -160,6 +160,7 @@ export default function App() {
                   key={dest.id}
                   destination={dest}
                   weatherDays={openMeteoData[dest.id]}
+                  usgsData={usgsData}
                 />
               ))}
             </div>

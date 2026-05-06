@@ -1,5 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { RIVERS } from '../data/rivers.js';
+import { BUCKET_LIST } from '../data/bucketList.js';
+
+// All USGS station IDs to fetch in one request (NorCal + US bucket list)
+function getAllStationIds() {
+  const bucketIds = BUCKET_LIST
+    .filter(d => d.usgsStationId)
+    .map(d => d.usgsStationId);
+  return [...RIVERS.map(r => r.usgsStationId), ...bucketIds];
+}
 
 const USGS_BASE = 'https://waterservices.usgs.gov/nwis/iv/';
 
@@ -66,7 +75,7 @@ export function useUSGSData() {
     setLoading(true);
     setError(null);
     try {
-      const siteIds = RIVERS.map(r => r.usgsStationId).join(',');
+      const siteIds = getAllStationIds().join(',');
       const url = `${USGS_BASE}?format=json&sites=${siteIds}&parameterCd=${PARAMS}&period=${PERIOD}&siteStatus=active`;
 
       const res = await fetch(url);
