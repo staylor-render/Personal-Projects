@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: norCal-fly-fishing
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    pullRequestPreviewsEnabled: true
